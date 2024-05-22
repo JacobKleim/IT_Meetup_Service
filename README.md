@@ -5,10 +5,10 @@
    cd /c/my_folder
    ```
    ```bash
-   git clone git@github.com:JacobKleim/where_to_go.git
+   git clone git@github.com:JacobKleim/IT_Meetup_Service.git
    ```
    ```bash
-   cd /c/my_folder/where_to_go
+   cd /c/my_folder/IT_Meetup_Service
    ```
 ## Environment      
  Сreate and activate a virtual environment  
