@@ -7,7 +7,7 @@ from telegram import Update
 from telegram.ext import (CallbackQueryHandler, Filters, MessageHandler)
 from telegram.ext import Updater, CommandHandler, CallbackContext
 
-import bot_parts.handlers.start as start_handlers
+import meetup.handlers.start as start_handlers
 
 load_dotenv()
 
