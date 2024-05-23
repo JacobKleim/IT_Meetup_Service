@@ -8,6 +8,9 @@ from telegram.ext import (CallbackQueryHandler, Filters, MessageHandler)
 from telegram.ext import Updater, CommandHandler, CallbackContext
 
 import meetup.handlers.start as start_handlers
+import meetup.handlers.default_user as user_handlers
+
+from meetup.helpers import check_bot_context
 
 load_dotenv()
 
@@ -20,6 +23,7 @@ class Command(BaseCommand):
 
 
 def user_input_handler(update: Update, context: CallbackContext):
+    check_bot_context(update, context)
     # получаем тело сообщения
     if update.message:
         # обычное сообщение
@@ -31,25 +35,29 @@ def user_input_handler(update: Update, context: CallbackContext):
         return
 
     if user_reply == '/start':
-        #TODO заменить на user_data['user'].state как будут модели
-        context.user_data['state'] = 'START'
+        context.user_data['user'].state = 'START'
         user_state = 'START'
+    elif user_reply == 'main_menu':
+        context.user_data['user'].state = 'CHOOSING'
+        user_state = 'CHOOSING'
+        start_handlers.show_menu(update, context)
     else:
-        user_state = context.user_data['state'] or 'START'
+        user_state = context.user_data['user'].state or 'START'
 
     # мапа, возвращающая callback функции для вызова дальше.
     states_function = {
         # start
         'START': start_handlers.handle_start,
+        'CHOOSING': start_handlers.handle_welcome_choice,
+        'HANDLE_EVENT': user_handlers.handle_event
     }
     # вызываем функцию для получения state
     state_handler = states_function[user_state]
     # получаем некст state
     next_state = state_handler(update, context)
     # записываем следующий state в юзера
-    context.user_data['state'] = next_state
-    # context.user_data['user'].state = next_state
-    # context.user_data['user'].save()
+    context.user_data['user'].state = next_state
+    context.user_data['user'].save()
 
 
 def main():

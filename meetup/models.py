@@ -9,6 +9,7 @@ class UserProfile(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     is_organizer = models.BooleanField(default=False)
     is_speaker = models.BooleanField(default=False)
+    state = models.CharField(max_length=30, default='START')
 
     def __str__(self):
         return self.name
@@ -30,7 +31,8 @@ class Event(models.Model):
 class Question(models.Model):
     user = models.ForeignKey(
         UserProfile,
-        on_delete=models.CASCADE)
+        on_delete=models.CASCADE,
+        related_name="users")
     speaker = models.ForeignKey(
         UserProfile,
         on_delete=models.CASCADE)
