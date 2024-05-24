@@ -32,10 +32,11 @@ class Question(models.Model):
     user = models.ForeignKey(
         UserProfile,
         on_delete=models.CASCADE,
-        related_name="users")
+        related_name='asked_questions')
     speaker = models.ForeignKey(
         UserProfile,
-        on_delete=models.CASCADE)
+        on_delete=models.CASCADE,
+        related_name='received_questions')
     text = models.TextField()
     event = models.ForeignKey(
         Event,
