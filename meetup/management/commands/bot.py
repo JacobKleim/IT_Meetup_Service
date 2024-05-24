@@ -5,12 +5,13 @@ from django.core.management.base import BaseCommand
 from dotenv import load_dotenv
 from telegram import Update
 from telegram.ext import (CallbackQueryHandler, Filters, MessageHandler, ConversationHandler)
-from telegram.ext import Updater, CommandHandler
+from telegram.ext import Updater, CommandHandler, CallbackContext
 
 import meetup.handlers.speaker as speaker_handlers
 import meetup.handlers.start as start_handlers
 import meetup.handlers.default_user as user_handlers
 import meetup.handlers.organizer as org_handlers
+from meetup.keyboards import get_start_keyboard
 
 load_dotenv()
 
@@ -27,6 +28,14 @@ def cancel(update: Update, context):
     return ConversationHandler.END
 
 
+def handle_menu(update: Update, context: CallbackContext) -> None:
+    update.callback_query.answer()
+    update.callback_query.edit_message_text(
+        text='Вы вернулись в главное меню.',
+        reply_markup=get_start_keyboard(update, context)
+    )
+
+
 def main():
     bot_token = os.environ['TELEGRAM_BOT_TOKEN']
     logging.basicConfig(
@@ -39,7 +48,7 @@ def main():
     conv_handler = ConversationHandler(
         entry_points=[CommandHandler('start', start_handlers.handle_start)],
         states={
-            "START": [
+            'START': [
                 CallbackQueryHandler(start_handlers.handle_menu, pattern='^main_menu$'),
 
                 CallbackQueryHandler(user_handlers.want_meet, pattern='^want_meet$'),
@@ -47,6 +56,16 @@ def main():
                 CallbackQueryHandler(user_handlers.event_schedule, pattern='^event_schedule$'),
                 CallbackQueryHandler(org_handlers.create_event, pattern='^create_event$'),
                 CallbackQueryHandler(speaker_handlers.answer_questions, pattern='^answer_questions$'),
+                ],
+            'GET_EVENT_TITLE': [
+                MessageHandler(Filters.text & ~Filters.command, org_handlers.get_event_title)
+            ],
+            'GET_EVENT_DESCRIPTION': [
+                MessageHandler(Filters.text & ~Filters.command, org_handlers.get_event_description)
+            ],
+            'GET_EVENT_PROGRAM': [
+                MessageHandler(Filters.text & ~Filters.command, org_handlers.get_event_program),
+                CallbackQueryHandler(start_handlers.handle_menu, pattern='^main_menu$'),
             ],
             "QUESTIONS": [
                 CallbackQueryHandler(start_handlers.handle_menu, pattern='^main_menu$'),
