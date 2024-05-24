@@ -4,13 +4,13 @@ import os
 from django.core.management.base import BaseCommand
 from dotenv import load_dotenv
 from telegram import Update
-from telegram.ext import (CallbackQueryHandler, Filters, MessageHandler)
-from telegram.ext import Updater, CommandHandler, CallbackContext
+from telegram.ext import (CallbackQueryHandler, Filters, MessageHandler, ConversationHandler)
+from telegram.ext import Updater, CommandHandler
 
+import meetup.handlers.speaker as speaker_handlers
 import meetup.handlers.start as start_handlers
 import meetup.handlers.default_user as user_handlers
-
-from meetup.helpers import check_bot_context
+import meetup.handlers.organizer as org_handlers
 
 load_dotenv()
 
@@ -22,42 +22,9 @@ class Command(BaseCommand):
         main()
 
 
-def user_input_handler(update: Update, context: CallbackContext):
-    check_bot_context(update, context)
-    # получаем тело сообщения
-    if update.message:
-        # обычное сообщение
-        user_reply = update.message.text
-    elif update.callback_query.data:
-        # callback
-        user_reply = update.callback_query.data
-    else:
-        return
-
-    if user_reply == '/start':
-        context.user_data['user'].state = 'START'
-        user_state = 'START'
-    elif user_reply == 'main_menu':
-        context.user_data['user'].state = 'CHOOSING'
-        user_state = 'CHOOSING'
-        start_handlers.show_menu(update, context)
-    else:
-        user_state = context.user_data['user'].state or 'START'
-
-    # мапа, возвращающая callback функции для вызова дальше.
-    states_function = {
-        # start
-        'START': start_handlers.handle_start,
-        'CHOOSING': start_handlers.handle_welcome_choice,
-        'HANDLE_EVENT': user_handlers.handle_event
-    }
-    # вызываем функцию для получения state
-    state_handler = states_function[user_state]
-    # получаем некст state
-    next_state = state_handler(update, context)
-    # записываем следующий state в юзера
-    context.user_data['user'].state = next_state
-    context.user_data['user'].save()
+def cancel(update: Update, context):
+    update.message.reply_text('Диалог завершен.')
+    return ConversationHandler.END
 
 
 def main():
@@ -69,12 +36,39 @@ def main():
 
     updater = Updater(bot_token)
     dp = updater.dispatcher
-    dp.add_handler(CommandHandler('start', user_input_handler))
-    dp.add_handler(CallbackQueryHandler(user_input_handler))
-    dp.add_handler(MessageHandler(Filters.text, user_input_handler))
+    conv_handler = ConversationHandler(
+        entry_points=[CommandHandler('start', start_handlers.handle_start)],
+        states={
+            "START": [
+                CallbackQueryHandler(start_handlers.handle_menu, pattern='^main_menu$'),
+
+                CallbackQueryHandler(user_handlers.want_meet, pattern='^want_meet$'),
+                CallbackQueryHandler(user_handlers.event_info, pattern='^next_event_info$'),
+                CallbackQueryHandler(user_handlers.event_schedule, pattern='^event_schedule$'),
+                CallbackQueryHandler(org_handlers.create_event, pattern='^create_event$'),
+                CallbackQueryHandler(speaker_handlers.answer_questions, pattern='^answer_questions$'),
+            ],
+            "QUESTIONS": [
+                CallbackQueryHandler(start_handlers.handle_menu, pattern='^main_menu$'),
+
+                CallbackQueryHandler(speaker_handlers.get_question, pattern=r'^question_\d+$'),
+                MessageHandler(Filters.text & ~Filters.command, speaker_handlers.get_answer),
+
+            ],
+            "EVENT": [
+                CallbackQueryHandler(start_handlers.handle_menu, pattern='^main_menu$'),
+                CallbackQueryHandler(user_handlers.event_info, pattern=r'^event\d+$'),
+                CallbackQueryHandler(user_handlers.donate, pattern='^donate$'),
+                CallbackQueryHandler(user_handlers.event_info, pattern='^contact_speaker$'),
+                CallbackQueryHandler(user_handlers.event_info, pattern='^event_program'),
+
+
+            ]
+        },
+        fallbacks=[CommandHandler('cancel', cancel)]
+    )
+    dp.add_handler(conv_handler)
     updater.start_polling()
     logger.info('Bot started')
 
     updater.idle()
-
-

@@ -11,3 +11,5 @@ def check_bot_context(update, context, force_update: bool = False):
             }
         )
         context.user_data['user'] = user
+
+
