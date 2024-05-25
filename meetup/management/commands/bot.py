@@ -57,6 +57,16 @@ def main():
                 CallbackQueryHandler(org_handlers.create_event, pattern='^create_event$'),
                 CallbackQueryHandler(speaker_handlers.answer_questions, pattern='^answer_questions$'),
                 ],
+            'MEETING_NAME': [
+                MessageHandler(Filters.text & ~Filters.command, user_handlers.ask_name)
+            ],
+            'MEETING_BIO': [
+                MessageHandler(Filters.text & ~Filters.command, user_handlers.ask_bio)
+            ],
+            'MEETING_CONTACT': [
+                MessageHandler(Filters.text & ~Filters.command, user_handlers.ask_contact_info)
+            ],
+
             'GET_EVENT_TITLE': [
                 MessageHandler(Filters.text & ~Filters.command, org_handlers.get_event_title)
             ],
