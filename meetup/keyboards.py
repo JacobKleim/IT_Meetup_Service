@@ -1,7 +1,9 @@
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup
 
+from meetup.models import Event
 
-def get_start_keyboard(update, context):
+
+def build_start_keyboard(update, context):
     keyboard = InlineKeyboardMarkup(
         [
             [InlineKeyboardButton('Хочу познакомиться', callback_data='want_meet')],
@@ -16,34 +18,45 @@ def get_start_keyboard(update, context):
     return keyboard
 
 
-EVENTS_KEYBOARD = InlineKeyboardMarkup(
-    [
-        [
-            InlineKeyboardButton('1 мероприятие', callback_data='event1'),
-            InlineKeyboardButton('2 мероприятие', callback_data='event2')
-        ],
-        [InlineKeyboardButton('В главное меню', callback_data='main_menu')]
-    ]
-)
+def build_events_keyboard():
+    events = Event.objects.all()
+    keyboard = []
+    if not events.exists():
+        keyboard.append([InlineKeyboardButton('Нет мероприятий:(', callback_data='main_menu')])
+    else:
+        for event in events:
+            keyboard.append([InlineKeyboardButton(f"{event.id}. {event.title}", callback_data=f"event{event.id}")])
+    keyboard.append([InlineKeyboardButton('В главное меню', callback_data='main_menu')])
+    return InlineKeyboardMarkup(keyboard)
+
+
+def build_speakers_keyboard(event):
+    speakers = event.speakers.all()
+    keyboard = []
+    if not speakers.exists():
+        keyboard.append([InlineKeyboardButton('Нет спикеров:(', callback_data='main_menu')])
+    else:
+        for speaker in speakers:
+            name = speaker.name if speaker.name else speaker.telegram_id
+            keyboard.append([InlineKeyboardButton(
+                f"Спикер {name}", callback_data=f"speaker{speaker.id}")])
+    keyboard.append([InlineKeyboardButton('В главное меню', callback_data='main_menu')])
+    return InlineKeyboardMarkup(keyboard)
+
+
+EVENTS_KEYBOARD = build_events_keyboard()
+
 EVENT_KEYBOARD = InlineKeyboardMarkup(
     [
         [
             InlineKeyboardButton('Программа мероприятия', callback_data='event_program'),
             InlineKeyboardButton('Задонатить', callback_data='donate'),
-            InlineKeyboardButton('Связаться с докладчиком', callback_data='contact_speaker')
+            InlineKeyboardButton('Связаться со спикером', callback_data='contact_speaker')
         ],
         [InlineKeyboardButton('В главное меню', callback_data='main_menu')]
     ]
 )
 
-SPEAKERS_EVENT_KEYBOARD = InlineKeyboardMarkup(
-    [
-        [InlineKeyboardButton('Докладчик 1', callback_data='speaker1')],
-        [InlineKeyboardButton('Докладчик 2', callback_data='speaker2')],
-        [InlineKeyboardButton('Докладчик 3', callback_data='speaker3')],
-        [InlineKeyboardButton('В главное меню', callback_data='main_menu')]
-    ]
-)
 
 BACK_TO_MENU_KEYBOARD = InlineKeyboardMarkup(
     [[InlineKeyboardButton('В главное меню', callback_data='main_menu')]]

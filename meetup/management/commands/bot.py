@@ -11,7 +11,7 @@ import meetup.handlers.speaker as speaker_handlers
 import meetup.handlers.start as start_handlers
 import meetup.handlers.default_user as user_handlers
 import meetup.handlers.organizer as org_handlers
-from meetup.keyboards import get_start_keyboard
+from meetup.keyboards import build_start_keyboard
 
 load_dotenv()
 
@@ -26,14 +26,6 @@ class Command(BaseCommand):
 def cancel(update: Update, context):
     update.message.reply_text('Диалог завершен.')
     return ConversationHandler.END
-
-
-def handle_menu(update: Update, context: CallbackContext) -> None:
-    update.callback_query.answer()
-    update.callback_query.edit_message_text(
-        text='Вы вернулись в главное меню.',
-        reply_markup=get_start_keyboard(update, context)
-    )
 
 
 def main():
@@ -84,12 +76,19 @@ def main():
                 MessageHandler(Filters.text & ~Filters.command, speaker_handlers.get_answer),
 
             ],
+            "ASK_QUESTION": [
+                CallbackQueryHandler(start_handlers.handle_menu, pattern='^main_menu$'),
+
+                CallbackQueryHandler(user_handlers.ask_question, pattern=r'^speaker\d+$'),
+                MessageHandler(Filters.text & ~Filters.command, user_handlers.save_question),
+
+            ],
             "EVENT": [
                 CallbackQueryHandler(start_handlers.handle_menu, pattern='^main_menu$'),
                 CallbackQueryHandler(user_handlers.event_info, pattern=r'^event\d+$'),
                 CallbackQueryHandler(user_handlers.donate, pattern='^donate$'),
-                CallbackQueryHandler(user_handlers.event_info, pattern='^contact_speaker$'),
-                CallbackQueryHandler(user_handlers.event_info, pattern='^event_program'),
+                CallbackQueryHandler(user_handlers.contact_speaker, pattern='^contact_speaker$'),
+                CallbackQueryHandler(user_handlers.event_program, pattern='^event_program'),
 
 
             ]
