@@ -22,7 +22,6 @@ class Event(models.Model):
     speakers = models.ManyToManyField(
         UserProfile,
         related_name='events',
-        limit_choices_to={'is_speaker': True},
         blank=True)
 
     def __str__(self):
@@ -59,7 +58,8 @@ class Report(models.Model):
         Event,
         on_delete=models.CASCADE,
         related_name='reports')
-    created_at = models.DateTimeField(auto_now_add=True)
+    start_time = models.DateTimeField(null=True, blank=True)
+    end_time = models.DateTimeField(null=True, blank=True)
 
     def __str__(self):
         return f'Report from {self.speaker}'

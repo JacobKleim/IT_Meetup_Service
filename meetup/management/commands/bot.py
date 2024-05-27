@@ -67,7 +67,11 @@ def main():
             ],
             'GET_EVENT_PROGRAM': [
                 MessageHandler(Filters.text & ~Filters.command, org_handlers.get_event_program),
-                CallbackQueryHandler(start_handlers.handle_menu, pattern='^main_menu$'),
+                # CallbackQueryHandler(start_handlers.handle_menu, pattern='^main_menu$'),
+            ],
+            'GET_EVENT_SPEAKERS': [
+                CallbackQueryHandler(org_handlers.add_speaker, pattern=r'^speaker_\d+$'),
+                CallbackQueryHandler(org_handlers.finalize_event_creation, pattern='^finalize_event_creation$')
             ],
             "QUESTIONS": [
                 CallbackQueryHandler(start_handlers.handle_menu, pattern='^main_menu$'),
