@@ -44,8 +44,6 @@ def build_speakers_keyboard(event):
     return InlineKeyboardMarkup(keyboard)
 
 
-EVENTS_KEYBOARD = build_events_keyboard()
-
 EVENT_KEYBOARD = InlineKeyboardMarkup(
     [
         [

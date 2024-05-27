@@ -4,14 +4,13 @@ import os
 from django.core.management.base import BaseCommand
 from dotenv import load_dotenv
 from telegram import Update
-from telegram.ext import (CallbackQueryHandler, Filters, MessageHandler, ConversationHandler)
-from telegram.ext import Updater, CommandHandler, CallbackContext
+from telegram.ext import (CallbackQueryHandler, Filters, MessageHandler, ConversationHandler,
+                          Updater, CommandHandler)
 
 import meetup.handlers.speaker as speaker_handlers
 import meetup.handlers.start as start_handlers
 import meetup.handlers.default_user as user_handlers
 import meetup.handlers.organizer as org_handlers
-from meetup.keyboards import build_start_keyboard
 
 load_dotenv()
 
@@ -67,7 +66,6 @@ def main():
             ],
             'GET_EVENT_PROGRAM': [
                 MessageHandler(Filters.text & ~Filters.command, org_handlers.get_event_program),
-                # CallbackQueryHandler(start_handlers.handle_menu, pattern='^main_menu$'),
             ],
             'GET_EVENT_SPEAKERS': [
                 CallbackQueryHandler(org_handlers.add_speaker, pattern=r'^speaker_\d+$'),
