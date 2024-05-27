@@ -47,3 +47,19 @@ class Question(models.Model):
 
     def __str__(self):
         return f'Question from {self.user} to {self.speaker}'
+
+
+class Report(models.Model):
+    speaker = models.ForeignKey(
+        UserProfile,
+        on_delete=models.CASCADE,
+        related_name='reports')
+    subject = models.CharField(max_length=100)
+    event = models.ForeignKey(
+        Event,
+        on_delete=models.CASCADE,
+        related_name='reports')
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f'Report from {self.speaker}'

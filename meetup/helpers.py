@@ -10,7 +10,7 @@ def check_bot_context(update, context, force_update: bool = False):
         context.user_data['user'] = user
 
 
-def get_user_profile(telegram_id: int) -> UserProfile | None:
+def get_user_profile(telegram_id: int) -> UserProfile:
     try:
         return UserProfile.objects.get(telegram_id=telegram_id)
     except UserProfile.DoesNotExist:
