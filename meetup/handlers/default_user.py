@@ -8,7 +8,7 @@ from meetup.helpers import get_user_profile
 from meetup.keyboards import (
     BACK_TO_MENU_KEYBOARD,
     EVENT_KEYBOARD,
-    EVENTS_KEYBOARD,
+    build_events_keyboard,
     build_speakers_keyboard
 )
 from meetup.models import UserProfile, Event, Question
@@ -135,7 +135,7 @@ def event_info(update: Update, context: CallbackContext):
 
 def event_schedule(update: Update, context: CallbackContext):
     update.callback_query.answer()
-    update.callback_query.edit_message_text(text='Выберите мероприятие:', reply_markup=EVENTS_KEYBOARD)
+    update.callback_query.edit_message_text(text='Выберите мероприятие:', reply_markup=build_events_keyboard())
     return "EVENT"
 
 
