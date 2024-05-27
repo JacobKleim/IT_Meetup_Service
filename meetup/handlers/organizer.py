@@ -75,4 +75,4 @@ def finalize_event_creation(update: Update, context: CallbackContext) -> str:
     else:
         error_message = response.json()
         update.callback_query.edit_message_text(f'Произошла ошибка при создании мероприятия: {error_message}', reply_markup=BACK_TO_MENU_KEYBOARD)
-    return ConversationHandler.END
+    return 'START'

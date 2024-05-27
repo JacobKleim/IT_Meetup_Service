@@ -62,4 +62,4 @@ class Report(models.Model):
     end_time = models.DateTimeField(null=True, blank=True)
 
     def __str__(self):
-        return f'Report from {self.speaker}'
+        return f'Report from {self.speaker} on {self.event.title}'

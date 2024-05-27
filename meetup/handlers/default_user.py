@@ -162,7 +162,27 @@ def contact_speaker(update: Update, context: CallbackContext):
 
 
 def event_program(update: Update, context: CallbackContext):
-    return None
+    event = context.chat_data.get('event')
+    if not event:
+        update.callback_query.answer()
+        update.callback_query.edit_message_text(
+            text='Не могу найти событие, попробуйте снова или обратитесь к администратору',
+            reply_markup=BACK_TO_MENU_KEYBOARD
+        )
+        return 'START'
+    reports = event.reports.all().order_by('start_time')
+    event_program_text = '\n'.join(
+        [f'{talk.subject} - {talk.speaker} - '
+         f'{talk.start_time.strftime("%Y-%m-%d %H:%M")} - '
+         f'{talk.end_time.strftime("%Y-%m-%d %H:%M")}' for talk in reports])
+    event_details = (
+        f'Программа мероприятия:\n{event_program_text}'
+    )
+
+    update.callback_query.answer()
+    update.callback_query.edit_message_text(text=event_details, reply_markup=EVENT_KEYBOARD)
+
+    return 'START'
 
 
 def ask_question(update: Update, context: CallbackContext):
