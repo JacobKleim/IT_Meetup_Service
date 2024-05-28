@@ -20,9 +20,12 @@
    source venv/Scripts/activate
    ```
  Get a bot token using **@BotFather** on Telegram.
- Create an .env file and put the bot token in there:
+ Create [Yookassa shop](https://yookassa.ru/) to use donates features. 
+ Create an .env file and put the bot token, yookassa token and shop id in there:
    ```python 
    TELEGRAM_BOT_TOKEN=bot_token
+   YOO_API_TOKEN=api_token
+   YOO_SHOP_ID=shop_id
    ```
 
 ## Requirements

@@ -1,17 +1,17 @@
 import random
 import re
 
-from telegram import Update, update
+from telegram import Update, update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import CallbackContext, ConversationHandler
 
-from meetup.helpers import get_user_profile
+from meetup.helpers import get_user_profile, create_yoo_payment
 from meetup.keyboards import (
     BACK_TO_MENU_KEYBOARD,
     EVENT_KEYBOARD,
     build_events_keyboard,
     build_speakers_keyboard
 )
-from meetup.models import UserProfile, Event, Question
+from meetup.models import UserProfile, Event, Question, Donation
 
 
 def want_meet(update: Update, context: CallbackContext):
@@ -142,6 +142,44 @@ def event_schedule(update: Update, context: CallbackContext):
 def donate(update: Update, context: CallbackContext):
     update.callback_query.answer()
     update.callback_query.edit_message_text(text='Введите сумму доната', reply_markup=BACK_TO_MENU_KEYBOARD)
+    return "EVENT"
+
+
+def get_payment(update: Update, context: CallbackContext):
+    try:
+        donate_amount = int(update.message.text)
+    except ValueError:
+        update.message.reply_text('Некорректное значение. Попробуйте ещё раз.')
+        return "EVENT"
+    user_id = update.message.from_user.id
+    payment_currency = "RUB"
+    metadata = {"user_id": user_id}
+    payment = create_yoo_payment(str(donate_amount), payment_currency, metadata)
+    payment_url = payment["confirmation"]["confirmation_url"]
+    sender = get_user_profile(user_id)
+    recipient = context.chat_data["event"].organizer
+    if not recipient:
+        update.message.reply_text(
+            "Организатор не найден, обратитесь к администратору",
+            reply_markup=BACK_TO_MENU_KEYBOARD
+        )
+        return ConversationHandler.END
+
+    reply_markup = InlineKeyboardMarkup([[InlineKeyboardButton("Перейти к оплате", url=payment_url)],
+                                         [InlineKeyboardButton('В главное меню', callback_data='main_menu')]])
+
+    update.message.reply_text(
+        text=f"Для завершения платежа на сумму {str(donate_amount)} {payment_currency} перейдите по ссылке:",
+        reply_markup=reply_markup
+    )
+    # Сохранение информации о донате в базу данных
+    Donation.objects.create(
+        sender=sender,
+        recipient=recipient,
+        amount=donate_amount,
+        event=context.chat_data["event"]
+    )
+    context.chat_data.pop("event", None)
     return "START"
 
 

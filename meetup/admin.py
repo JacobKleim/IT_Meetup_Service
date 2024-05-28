@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from meetup.models import UserProfile, Event, Question, Report
+from meetup.models import UserProfile, Event, Question, Report, Donation
 
 
 @admin.register(UserProfile)
@@ -20,4 +20,9 @@ class QuestionAdmin(admin.ModelAdmin):
 
 @admin.register(Report)
 class ReportAdmin(admin.ModelAdmin):
+    pass
+
+
+@admin.register(Donation)
+class DonationAdmin(admin.ModelAdmin):
     pass

@@ -91,13 +91,17 @@ def main():
                 CallbackQueryHandler(user_handlers.donate, pattern='^donate$'),
                 CallbackQueryHandler(user_handlers.contact_speaker, pattern='^contact_speaker$'),
                 CallbackQueryHandler(user_handlers.event_program, pattern='^event_program'),
-
-
-            ]
+                MessageHandler(Filters.text & ~Filters.command, user_handlers.get_payment),
+            ],
+            # "DONATE":[
+            #     CallbackQueryHandler(start_handlers.handle_menu, pattern='^main_menu$'),
+            #     CallbackQueryHandler(user_handlers.donate, pattern='^donate$'),
+            # ]
         },
         fallbacks=[CommandHandler('cancel', cancel)]
     )
     dp.add_handler(conv_handler)
+    dp.bot_data["TELEGRAM_URL"] = os.environ['TELEGRAM_URL']
     updater.start_polling()
     logger.info('Bot started')
 

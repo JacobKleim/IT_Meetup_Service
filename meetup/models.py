@@ -23,6 +23,12 @@ class Event(models.Model):
         UserProfile,
         related_name='events',
         blank=True)
+    organizer = models.ForeignKey(
+        UserProfile,
+        on_delete=models.CASCADE,
+        related_name='organizer_events',
+        null=True
+    )
 
     def __str__(self):
         return self.title
@@ -64,3 +70,14 @@ class Report(models.Model):
 
     def __str__(self):
         return f'Report from {self.speaker} on {self.event.title}'
+
+
+class Donation(models.Model):
+    sender = models.ForeignKey(UserProfile, related_name='sent_donations', on_delete=models.CASCADE)
+    recipient = models.ForeignKey(UserProfile, related_name='received_donations', on_delete=models.CASCADE)
+    amount = models.DecimalField(max_digits=10, decimal_places=2)
+    date = models.DateTimeField(auto_now_add=True)
+    event = models.ForeignKey(Event, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return f"Donation from {self.sender} to {self.recipient} of {self.amount} on {self.date.strftime('%Y-%m-%d %H:%M:%S')} "
