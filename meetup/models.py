@@ -43,6 +43,7 @@ class Question(models.Model):
         on_delete=models.CASCADE,
         related_name='questions')
     created_at = models.DateTimeField(auto_now_add=True)
+    answer = models.TextField(blank=True, null=True)
 
     def __str__(self):
         return f'Question from {self.user} to {self.speaker}'

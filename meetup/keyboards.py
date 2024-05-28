@@ -1,6 +1,6 @@
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup
 
-from meetup.models import Event
+from meetup.models import Event, Question
 
 
 def build_start_keyboard(update, context):
@@ -40,6 +40,17 @@ def build_speakers_keyboard(event):
             name = speaker.name if speaker.name else speaker.telegram_id
             keyboard.append([InlineKeyboardButton(
                 f"Спикер {name}", callback_data=f"speaker{speaker.id}")])
+    keyboard.append([InlineKeyboardButton('В главное меню', callback_data='main_menu')])
+    return InlineKeyboardMarkup(keyboard)
+
+
+def build_questions_keyboard(speaker):
+    questions = Question.objects.filter(speaker=speaker)
+    keyboard = []
+
+    for question in questions:
+        keyboard.append([InlineKeyboardButton(question.text, callback_data=f'question_{question.id}')])
+
     keyboard.append([InlineKeyboardButton('В главное меню', callback_data='main_menu')])
     return InlineKeyboardMarkup(keyboard)
 
