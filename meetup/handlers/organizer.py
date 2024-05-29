@@ -3,6 +3,8 @@ import requests
 from telegram import Update
 from telegram.ext import CallbackContext, ConversationHandler
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup
+
+from meetup.helpers import get_user_profile
 from meetup.models import UserProfile
 from meetup.keyboards import BACK_TO_MENU_KEYBOARD
 
@@ -25,6 +27,8 @@ def create_event(update: Update, context: CallbackContext) -> None:
 
 def get_event_title(update: Update, context: CallbackContext) -> None:
     context.chat_data['event_info'] = {'title': update.message.text}
+    organizer = get_user_profile(update.message.from_user.id).pk
+    context.chat_data['event_info']['organizer'] = organizer
     update.message.reply_text('Введите описание мероприятия:')
     return 'GET_EVENT_DESCRIPTION'
 
