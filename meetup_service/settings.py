@@ -1,12 +1,20 @@
+import os
 from pathlib import Path
+from dotenv import load_dotenv
+
+load_dotenv()
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+
+CREATE_EVENT_URL = 'http://91.210.171.134:888/api/events/'
+
 SECRET_KEY = 'django-insecure-6d+lokam+z6!nhglp1=_=$d%r+g(hkl^n5!s8j*$002s0nh7vb'
 
-DEBUG = True
+DEBUG = False
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = os.environ["ALLOWED_HOSTS"].split()
 
 
 INSTALLED_APPS = [

@@ -1,5 +1,8 @@
+import os
 import requests
 
+
+from django.conf import settings
 from telegram import Update
 from telegram.ext import CallbackContext, ConversationHandler
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup
@@ -72,7 +75,7 @@ def finalize_event_creation(update: Update, context: CallbackContext) -> str:
     title = event_data['title']
     speakers = event_data.get('speakers', [])
     event_data['speakers'] = [int(speaker_id) for speaker_id in speakers]
-    response = requests.post('http://127.0.0.1:8000/api/events/', json=event_data)
+    response = requests.post(settings.CREATE_EVENT_URL, json=event_data)
 
     if response.status_code == 201:
         update.callback_query.edit_message_text(f'Мероприятие "{title}" создано!', reply_markup=BACK_TO_MENU_KEYBOARD)

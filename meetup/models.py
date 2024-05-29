@@ -12,7 +12,7 @@ class UserProfile(models.Model):
     state = models.CharField(max_length=30, default='START')
 
     def __str__(self):
-        return self.name
+        return self.name if self.name else self.telegram_id
 
 
 class Event(models.Model):
